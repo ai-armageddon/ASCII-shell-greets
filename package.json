@@ -1,0 +1,34 @@
+{
+  "name": "ascii-shell-greets",
+  "version": "1.0.0",
+  "description": "Funny ASCII greetings for your shell startup",
+  "type": "commonjs",
+  "bin": {
+    "ascii-shell-greets": "bin/ascii-shell-greets.js"
+  },
+  "main": "src/cli.js",
+  "scripts": {
+    "test": "node --test",
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "keywords": [
+    "ascii",
+    "shell",
+    "cli",
+    "greeting",
+    "terminal"
+  ],
+  "author": "ai-armageddon",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ai-armageddon/ASCII-shell-greets.git"
+  },
+  "homepage": "https://github.com/ai-armageddon/ASCII-shell-greets#readme",
+  "bugs": {
+    "url": "https://github.com/ai-armageddon/ASCII-shell-greets/issues"
+  }
+}
