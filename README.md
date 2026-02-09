@@ -11,7 +11,9 @@ Be greeted with colorful ASCII art whenever you open a shell.
 - Time-based greeting (`Good morning`, `Good afternoon`, `Good evening`)
 - Random jokes, daily missions, and optional fortune lines
 - Config file support (`~/.ascii-shell-greets.json`)
-- Startup hook automation (`setup`, `doctor`, and postinstall support)
+- Interactive setup that asks whether to run on terminal startup
+- Optional short alias (`asg` by default, customizable)
+- Startup hook automation (`setup` and `doctor`)
 
 ## Install
 
@@ -19,9 +21,12 @@ Be greeted with colorful ASCII art whenever you open a shell.
 npm install -g ascii-shell-greets
 ```
 
-By default, global installs attempt to add a startup hook to your shell config.
+During interactive global installs, setup asks if you want:
 
-Skip that behavior with:
+- Auto-greeting on new terminal sessions
+- A short alias for the command
+
+Skip setup prompts with:
 
 ```bash
 ASG_SKIP_SETUP=1 npm install -g ascii-shell-greets
@@ -64,7 +69,16 @@ Options:
 ascii-shell-greets setup
 ascii-shell-greets setup --shell bash
 ascii-shell-greets setup --shell zsh --dry-run
+ascii-shell-greets setup --alias asg
+ascii-shell-greets setup --no-startup --alias wow
 ```
+
+Setup options:
+
+- `--alias <name>`
+- `--no-alias`
+- `--startup` / `--no-startup`
+- `--interactive` / `--no-interactive`
 
 ### Doctor
 
@@ -72,7 +86,7 @@ ascii-shell-greets setup --shell zsh --dry-run
 ascii-shell-greets doctor
 ```
 
-Checks `zsh`, `bash`, and `fish` shell rc files for startup hook status.
+Checks `zsh`, `bash`, and `fish` shell rc files for startup and alias status.
 
 ## Config file
 

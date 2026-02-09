@@ -1,6 +1,6 @@
 "use strict";
 
-const { installSnippet } = require("../src/setup");
+const { runInteractiveSetup } = require("../src/setup");
 
 function isGlobalInstall() {
   if (process.env.npm_config_global === "true") {
@@ -15,7 +15,11 @@ function shouldSkipSetup() {
   return Boolean(process.env.ASG_SKIP_SETUP) || process.env.CI === "true";
 }
 
-function runPostinstallSetup() {
+function canPrompt() {
+  return Boolean(process.stdin.isTTY && process.stdout.isTTY);
+}
+
+async function runPostinstallSetup() {
   if (shouldSkipSetup()) {
     return;
   }
@@ -25,10 +29,16 @@ function runPostinstallSetup() {
   }
 
   try {
-    installSnippet({ quiet: true });
+    if (!canPrompt()) {
+      return;
+    }
+
+    console.log("ascii-shell-greets installed.");
+    console.log("Quick setup:");
+    await runInteractiveSetup({ quiet: false });
   } catch (error) {
-    // Keep install resilient even if startup hook cannot be written.
+    // Keep install resilient even if setup cannot run.
   }
 }
 
-runPostinstallSetup();
+void runPostinstallSetup();

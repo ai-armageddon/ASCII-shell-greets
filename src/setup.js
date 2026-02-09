@@ -3,9 +3,12 @@
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
+const readline = require("node:readline/promises");
 
 const START_MARKER = "# >>> ascii-shell-greets >>>";
 const END_MARKER = "# <<< ascii-shell-greets <<<";
+const ALIAS_START_MARKER = "# >>> ascii-shell-greets-alias >>>";
+const ALIAS_END_MARKER = "# <<< ascii-shell-greets-alias <<<";
 
 function detectShell(explicitShell) {
   if (explicitShell) {
@@ -39,7 +42,7 @@ function resolveRcPath(shellName) {
   return path.join(home, ".zshrc");
 }
 
-function buildSnippet(shellName) {
+function buildStartupSnippet(shellName) {
   if (shellName === "fish") {
     return [
       START_MARKER,
@@ -55,6 +58,22 @@ function buildSnippet(shellName) {
   ].join("\n");
 }
 
+function buildAliasSnippet(shellName, aliasName) {
+  if (shellName === "fish") {
+    return [
+      ALIAS_START_MARKER,
+      `alias ${aliasName} "ascii-shell-greets"`,
+      ALIAS_END_MARKER
+    ].join("\n");
+  }
+
+  return [
+    ALIAS_START_MARKER,
+    `alias ${aliasName}='ascii-shell-greets'`,
+    ALIAS_END_MARKER
+  ].join("\n");
+}
+
 function ensureParentDir(filePath) {
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
@@ -62,11 +81,51 @@ function ensureParentDir(filePath) {
   }
 }
 
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function upsertManagedBlock(content, block, startMarker, endMarker, force) {
+  const pattern = new RegExp(
+    `${escapeRegex(startMarker)}[\\s\\S]*?${escapeRegex(endMarker)}\\n?`,
+    "m"
+  );
+  const hasExisting = pattern.test(content);
+
+  if (hasExisting && !force) {
+    return {
+      next: content,
+      changed: false
+    };
+  }
+
+  const base = hasExisting ? content.replace(pattern, "").trimEnd() : content.trimEnd();
+  const next = base.length > 0 ? `${base}\n\n${block}\n` : `${block}\n`;
+
+  return {
+    next,
+    changed: true
+  };
+}
+
+function isValidAliasName(aliasName) {
+  return /^[A-Za-z_][A-Za-z0-9_-]*$/.test(aliasName);
+}
+
 function installSnippet(options = {}) {
   const shellName = detectShell(options.shell);
   const rcPath = resolveRcPath(shellName);
-  const snippet = buildSnippet(shellName);
+  const startupSnippet = buildStartupSnippet(shellName);
+  const startupEnabled = options.startup !== false;
+  const aliasName = typeof options.alias === "string" ? options.alias.trim() : "";
+  const aliasEnabled = aliasName.length > 0;
   const quiet = Boolean(options.quiet);
+
+  if (aliasEnabled && !isValidAliasName(aliasName)) {
+    throw new Error(
+      `Invalid alias name "${aliasName}". Use letters/numbers/_/- and start with a letter or _.`
+    );
+  }
 
   ensureParentDir(rcPath);
 
@@ -75,38 +134,139 @@ function installSnippet(options = {}) {
     current = fs.readFileSync(rcPath, "utf8");
   }
 
-  if (current.includes(START_MARKER) && !options.force) {
+  if (!startupEnabled && !aliasEnabled) {
     if (!quiet) {
-      console.log(`ascii-shell-greets already configured in ${rcPath}`);
+      console.log("No setup options selected. Nothing changed.");
     }
-
     return {
       rcPath,
       changed: false,
       shell: shellName,
-      reason: "already-configured"
+      reason: "no-op"
     };
   }
 
-  const next = current.trimEnd().length > 0 ? `${current.trimEnd()}\n\n${snippet}\n` : `${snippet}\n`;
+  let next = current;
+  let startupChanged = false;
+  let aliasChanged = false;
 
-  if (!options.dryRun) {
+  if (startupEnabled) {
+    const startupResult = upsertManagedBlock(
+      next,
+      startupSnippet,
+      START_MARKER,
+      END_MARKER,
+      Boolean(options.force)
+    );
+    next = startupResult.next;
+    startupChanged = startupResult.changed;
+  }
+
+  if (aliasEnabled) {
+    const aliasSnippet = buildAliasSnippet(shellName, aliasName);
+    const aliasResult = upsertManagedBlock(
+      next,
+      aliasSnippet,
+      ALIAS_START_MARKER,
+      ALIAS_END_MARKER,
+      Boolean(options.force)
+    );
+    next = aliasResult.next;
+    aliasChanged = aliasResult.changed;
+  }
+
+  const changed = startupChanged || aliasChanged;
+
+  if (!options.dryRun && changed) {
     fs.writeFileSync(rcPath, next, "utf8");
   }
 
   if (!quiet) {
-    if (options.dryRun) {
-      console.log(`Dry run: would add startup hook to ${rcPath}`);
+    if (!changed) {
+      console.log(`ascii-shell-greets already configured in ${rcPath}`);
+    } else if (options.dryRun) {
+      console.log(`Dry run: would update ${rcPath}`);
     } else {
-      console.log(`Added startup hook to ${rcPath}`);
+      console.log(`Updated ${rcPath}`);
+    }
+
+    if (startupEnabled) {
+      const status = startupChanged ? "enabled" : "already enabled";
+      console.log(`Startup greeting: ${status}`);
+    }
+
+    if (aliasEnabled) {
+      const status = aliasChanged ? "added" : "already present";
+      console.log(`Alias (${aliasName}): ${status}`);
     }
   }
 
   return {
     rcPath,
-    changed: true,
-    shell: shellName
+    changed,
+    shell: shellName,
+    startupEnabled,
+    alias: aliasEnabled ? aliasName : undefined
   };
+}
+
+function parseYesNo(answer, fallback) {
+  const normalized = String(answer || "").trim().toLowerCase();
+  if (normalized.length === 0) {
+    return fallback;
+  }
+
+  if (normalized === "y" || normalized === "yes") {
+    return true;
+  }
+
+  if (normalized === "n" || normalized === "no") {
+    return false;
+  }
+
+  return fallback;
+}
+
+async function runInteractiveSetup(options = {}) {
+  const shellName = detectShell(options.shell);
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  try {
+    const startupAnswer = await rl.question(
+      `Run ascii-shell-greets each time a new ${shellName} terminal opens? (Y/n) `
+    );
+    const startup = parseYesNo(startupAnswer, true);
+
+    const aliasAnswer = await rl.question("Add a short alias command too? (y/N) ");
+    const wantsAlias = parseYesNo(aliasAnswer, false);
+
+    let alias;
+    if (wantsAlias) {
+      // Loop until we receive a shell-safe alias name.
+      while (!alias) {
+        const rawAlias = await rl.question("Alias name [asg]: ");
+        const candidate = rawAlias.trim().length > 0 ? rawAlias.trim() : "asg";
+
+        if (isValidAliasName(candidate)) {
+          alias = candidate;
+        } else {
+          console.log("Alias must match [A-Za-z_][A-Za-z0-9_-]*");
+        }
+      }
+    }
+
+    return installSnippet({
+      ...options,
+      shell: shellName,
+      startup,
+      alias
+    });
+  } finally {
+    rl.close();
+  }
 }
 
 function doctor() {
@@ -121,14 +281,19 @@ function doctor() {
       shell: shellName,
       rcPath,
       exists,
-      configured: content.includes(START_MARKER)
+      configured: content.includes(START_MARKER),
+      aliasConfigured: content.includes(ALIAS_START_MARKER)
     };
   });
 }
 
 module.exports = {
   installSnippet,
+  runInteractiveSetup,
+  isValidAliasName,
   doctor,
   START_MARKER,
-  END_MARKER
+  END_MARKER,
+  ALIAS_START_MARKER,
+  ALIAS_END_MARKER
 };

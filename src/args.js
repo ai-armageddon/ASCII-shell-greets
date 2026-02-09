@@ -14,6 +14,9 @@ function parseArgs(argv) {
     color: undefined,
     configPath: undefined,
     shell: undefined,
+    alias: undefined,
+    startup: undefined,
+    interactive: undefined,
     dryRun: false,
     quiet: false,
     force: false,
@@ -156,6 +159,42 @@ function parseArgs(argv) {
 
     if (token.startsWith("--shell=")) {
       options.shell = token.slice("--shell=".length);
+      continue;
+    }
+
+    if (token === "--alias") {
+      options.alias = argv[i + 1];
+      i += 1;
+      continue;
+    }
+
+    if (token.startsWith("--alias=")) {
+      options.alias = token.slice("--alias=".length);
+      continue;
+    }
+
+    if (token === "--no-alias") {
+      options.alias = false;
+      continue;
+    }
+
+    if (token === "--startup") {
+      options.startup = true;
+      continue;
+    }
+
+    if (token === "--no-startup") {
+      options.startup = false;
+      continue;
+    }
+
+    if (token === "--interactive") {
+      options.interactive = true;
+      continue;
+    }
+
+    if (token === "--no-interactive") {
+      options.interactive = false;
       continue;
     }
 

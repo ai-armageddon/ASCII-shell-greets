@@ -26,9 +26,21 @@ test("parseArgs parses long and short flags", () => {
 });
 
 test("parseArgs identifies setup command", () => {
-  const parsed = parseArgs(["setup", "--shell", "bash", "--dry-run"]);
+  const parsed = parseArgs([
+    "setup",
+    "--shell",
+    "bash",
+    "--dry-run",
+    "--alias",
+    "asg",
+    "--no-startup",
+    "--no-interactive"
+  ]);
 
   assert.equal(parsed.command, "setup");
   assert.equal(parsed.shell, "bash");
   assert.equal(parsed.dryRun, true);
+  assert.equal(parsed.alias, "asg");
+  assert.equal(parsed.startup, false);
+  assert.equal(parsed.interactive, false);
 });

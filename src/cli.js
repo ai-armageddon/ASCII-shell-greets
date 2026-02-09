@@ -5,7 +5,7 @@ const { loadConfig } = require("./config");
 const { listArts } = require("./content");
 const { listThemes } = require("./styles");
 const { renderGreeting } = require("./render");
-const { installSnippet, doctor } = require("./setup");
+const { installSnippet, runInteractiveSetup, doctor } = require("./setup");
 
 function readVersion() {
   try {
@@ -38,11 +38,17 @@ Options:
       --color / --no-color  Toggle ANSI colors
       --config <path>       Use custom config file path
       --list                Show available themes and art names
+      --alias <name>        Add a short alias in setup (example: asg)
+      --no-alias            Skip alias in setup
+      --startup / --no-startup
+                            Enable/disable startup hook in setup
+      --interactive / --no-interactive
+                            Prompt in setup for startup + alias choices
   -h, --help                Show help
   -v, --version             Show version
 
 Env vars:
-  ASG_SKIP_SETUP=1          Skip postinstall shell hook setup
+  ASG_SKIP_SETUP=1          Skip postinstall setup prompts
   NO_COLOR=1                Disable ANSI colors
 `);
 }
@@ -77,12 +83,13 @@ function printDoctor() {
 
   for (const check of checks) {
     const presence = check.exists ? "exists" : "missing";
-    const installed = check.configured ? "configured" : "not configured";
-    console.log(`${check.shell}: ${check.rcPath} (${presence}, ${installed})`);
+    const startup = check.configured ? "startup: configured" : "startup: not configured";
+    const alias = check.aliasConfigured ? "alias: configured" : "alias: not configured";
+    console.log(`${check.shell}: ${check.rcPath} (${presence}, ${startup}, ${alias})`);
   }
 }
 
-function run(argv = process.argv.slice(2)) {
+async function run(argv = process.argv.slice(2)) {
   const args = parseArgs(argv);
 
   if (args.command === "help") {
@@ -96,12 +103,23 @@ function run(argv = process.argv.slice(2)) {
   }
 
   if (args.command === "setup") {
-    installSnippet({
+    const interactiveByDefault = Boolean(process.stdin.isTTY && process.stdout.isTTY);
+    const interactive = args.interactive ?? interactiveByDefault;
+    const alias = args.alias === false ? undefined : args.alias;
+    const setupOptions = {
       shell: args.shell,
       dryRun: args.dryRun,
       force: args.force,
-      quiet: args.quiet
-    });
+      quiet: args.quiet,
+      startup: args.startup,
+      alias
+    };
+
+    if (interactive && args.alias === undefined && args.startup === undefined) {
+      await runInteractiveSetup(setupOptions);
+    } else {
+      installSnippet(setupOptions);
+    }
     return;
   }
 
