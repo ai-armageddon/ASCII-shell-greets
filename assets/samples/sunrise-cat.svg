@@ -1,0 +1,31 @@
+<svg width="980" height="460" viewBox="0 0 980 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ascii-shell-greets sunrise cat sample</title>
+  <desc id="desc">Terminal style screenshot of ascii-shell-greets output with cat art and sunrise colors.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#201c3a"/>
+      <stop offset="100%" stop-color="#3f224b"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="980" height="460" fill="#111018"/>
+  <rect x="40" y="30" width="900" height="400" rx="14" fill="url(#bg)" stroke="#ff7f50" stroke-width="2"/>
+  <rect x="40" y="30" width="900" height="38" rx="14" fill="#2a1f3b"/>
+  <circle cx="68" cy="49" r="8" fill="#ff5f56"/>
+  <circle cx="92" cy="49" r="8" fill="#ffbd2e"/>
+  <circle cx="116" cy="49" r="8" fill="#27c93f"/>
+  <text x="140" y="55" fill="#f0d7ff" font-family="Menlo, Monaco, 'Courier New', monospace" font-size="15">ascii-shell-greets --theme sunrise --art cat --name "Ari"</text>
+
+  <g font-family="Menlo, Monaco, 'Courier New', monospace" font-size="19" xml:space="preserve">
+    <text x="78" y="108" fill="#ff8c66"> /\_/\\</text>
+    <text x="78" y="136" fill="#ff6f91">( o.o )</text>
+    <text x="78" y="164" fill="#ffd166"> &gt; ^ &lt;</text>
+
+    <text x="78" y="218" fill="#ffd8a8">+------------------------------------+</text>
+    <text x="78" y="246" fill="#fff0c2">| Good evening, Ari!                 |</text>
+    <text x="78" y="274" fill="#ffd8a8">| Joke: I wanted to tell a UDP joke. |</text>
+    <text x="78" y="302" fill="#ffd8a8">| Mission: Ship one tiny improvement.|</text>
+    <text x="78" y="330" fill="#ffd8a8">+------------------------------------+</text>
+
+    <text x="78" y="382" fill="#c8b7e8">$ asg</text>
+  </g>
+</svg>

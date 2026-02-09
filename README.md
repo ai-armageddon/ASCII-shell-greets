@@ -41,6 +41,20 @@ ascii-shell-greets --no-joke --fortune --message "Today is release day."
 ascii-shell-greets --list
 ```
 
+## Sample Output
+
+### Sunrise Cat
+
+![Sunrise cat sample](assets/samples/sunrise-cat.svg)
+
+### Ocean Dragon
+
+![Ocean dragon sample](assets/samples/ocean-dragon.svg)
+
+### Retro Robot
+
+![Retro robot sample](assets/samples/retro-robot.svg)
+
 ## Commands
 
 ### Greet

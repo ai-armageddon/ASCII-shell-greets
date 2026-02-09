@@ -1,0 +1,30 @@
+<svg width="980" height="460" viewBox="0 0 980 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ascii-shell-greets retro robot sample</title>
+  <desc id="desc">Terminal style screenshot of ascii-shell-greets output with robot art and retro green colors.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#07140a"/>
+      <stop offset="100%" stop-color="#0d220f"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="980" height="460" fill="#020503"/>
+  <rect x="40" y="30" width="900" height="400" rx="14" fill="url(#bg)" stroke="#00ff66" stroke-width="2"/>
+  <rect x="40" y="30" width="900" height="38" rx="14" fill="#0a1b0d"/>
+  <circle cx="68" cy="49" r="8" fill="#ff5f56"/>
+  <circle cx="92" cy="49" r="8" fill="#ffbd2e"/>
+  <circle cx="116" cy="49" r="8" fill="#27c93f"/>
+  <text x="140" y="55" fill="#91ffba" font-family="Menlo, Monaco, 'Courier New', monospace" font-size="15">ascii-shell-greets --theme retro --art robot --message "Deploy day"</text>
+
+  <g font-family="Menlo, Monaco, 'Courier New', monospace" font-size="19" xml:space="preserve">
+    <text x="78" y="108" fill="#00ff66">  [::::]</text>
+    <text x="78" y="136" fill="#66ff99">  |o  o|</text>
+    <text x="78" y="164" fill="#00ff66">  | -- |</text>
+    <text x="78" y="192" fill="#66ff99"> /|____|\\</text>
+
+    <text x="78" y="244" fill="#8dffb2">+---------------------------------------+</text>
+    <text x="78" y="272" fill="#d4ffe6">| Good evening!                         |</text>
+    <text x="78" y="300" fill="#8dffb2">| Deploy day                            |</text>
+    <text x="78" y="328" fill="#8dffb2">| Mission: Automate one repetitive task.|</text>
+    <text x="78" y="356" fill="#8dffb2">+---------------------------------------+</text>
+  </g>
+</svg>
